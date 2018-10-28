@@ -174,7 +174,7 @@ function colorQueryHandler(req) {
 function uploadImgHandler(req) {
   console.log(req.payload);
   console.log('imageHandler');
-  return null;
+  return "test";
 }
 
 function attemptColorBroadcast(channelId) {
@@ -254,31 +254,13 @@ function userIsInCooldown(opaqueUserId) {
 }
 
 (async () => {
-  // Handle a viewer request to cycle the color.
-  server.route({
-    method: 'POST',
-    path: '/color/cycle',
-    handler: colorCycleHandler,
-  });
-
-  // Handle a new viewer requesting the color.
-  server.route({
-    method: 'GET',
-    path: '/color/query',
-    handler: colorQueryHandler,
-  });
 
   server.route({
     method: 'POST',
-    path: '/color/upload',
+    path: '/api/upload',
     handler: uploadImgHandler,
   });
 
-  server.route({
-    method: 'POST',
-    path: '/file-upload',
-    handler: uploadImgHandler,
-  });
 
   // Start the server.
   await server.start();

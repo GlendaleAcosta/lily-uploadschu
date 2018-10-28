@@ -7,16 +7,13 @@ var twitch = window.Twitch.ext;
 
 // create the request options for our Twitch API calls
 var requests = {
-    set: createRequest('POST', 'cycle'),
-    get: createRequest('GET', 'query'),
     setUpload: upload('POST', 'upload')
 };
 
 function upload(type, method, file) {
-  console.log(file);
   return {
       type: type,
-      url: 'https://localhost:8081/color/' + method,
+      url: 'https://localhost:8081/api/' + method,
       success: logSuccess,
       error: logError,
       data: {
@@ -28,11 +25,10 @@ function upload(type, method, file) {
 }
 
 function createRequest(type, method) {
-
     return {
         type: type,
-        url: 'https://localhost:8081/color/' + method,
-        success: uploadImg,
+        url: 'https://localhost:8081/api/' + method,
+        success: logSuccess,
         error: logError
     }
 }
@@ -53,21 +49,9 @@ twitch.onAuthorized(function(auth) {
     token = auth.token;
     tuid = auth.userId;
 
-    // enable the button
-    $('#cycle').removeAttr('disabled');
-
     setAuth(token);
     $.ajax(requests.get);
 });
-
-function updateBlock(hex) {
-    twitch.rig.log('Updating block color');
-    $('#color').css('background-color', hex);
-}
-
-function uploadImg() {
-
-}
 
 function logError(_, error, status) {
   twitch.rig.log('EBS request returned '+status+' ('+error+')');
@@ -76,33 +60,25 @@ function logError(_, error, status) {
 function logSuccess(hex, status) {
   // we could also use the output to update the block synchronously here,
   // but we want all views to get the same broadcast response at the same time.
-
   twitch.rig.log('EBS request returned '+hex+' ('+status+')');
 }
 
 $(function() {
-
-    // when we click the cycle button
-    $('#cycle').click(function() {
-        if(!token) { return twitch.rig.log('Not authorized'); }
-        twitch.rig.log('Requesting a color cycle');
-        $.ajax(requests.set);
-    });
-
     $('#upload').click(function() {
-      twitch.rig.log('Uploading bruh');
-      console.log('here');
+      twitch.rig.log('clicked upload button');
       var fd = new FormData();
       var files = $('#file-submission')[0].files[0];
       fd.append('image',files);
+      console.log('here');
       console.log(fd.get('image'));
-      $.ajax(upload('POST', 'upload', fd.get('image')));
-
+      $.ajax(upload('POST', 'upload', fd.get('image')))
+        .done(function(val) {
+          $('#test').text(val);
+        })
     })
 
     // listen for incoming broadcast message from our EBS
     twitch.listen('broadcast', function (target, contentType, color) {
         twitch.rig.log('Received broadcast color');
-        updateBlock(color);
     });
 });
